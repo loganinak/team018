@@ -13,23 +13,8 @@ public class RobotPlayer {
 		while (true) {
 			location = rc.getLocation();
 			try {
-				if (rc.getType() == RobotType.HQ) {
-					// spawn soldier
-					Direction dir = location.directionTo(rc.senseEnemyHQLocation());
-					if (rc.canMove(dir))
-						rc.spawn(dir);
-				} else if (rc.getType() == RobotType.SOLDIER) {
-					// sense and destroy mines
-					
-					if (location.distanceSquaredTo(enemyHQ) <2) {
-						rc.attackSquare(location.add(Direction.NORTH));
-					} else if (rc.senseMine(location.add(rc.getLocation().directionTo(rc.senseEnemyHQLocation()))) != null) {
-						rc.defuseMine(location.add(location.directionTo(rc.senseEnemyHQLocation())));
-					} else {
-						rc.move(location.directionTo(rc.senseEnemyHQLocation()));
-						rc.setIndicatorString(0, "test");
-					}
-				}
+				//RESEARCHES A NUKE
+				rc.researchUpgrade(Upgrade.NUKE);
 				rc.yield();
 			} catch (Exception e) {
 				e.printStackTrace();
