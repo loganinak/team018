@@ -10,6 +10,7 @@ public class RobotPlayer {
 	public static void run(RobotController rc) {
 		rcGlob = rc;
 		enemyHQ = rc.senseEnemyHQLocation();
+		
 		while (true) {
 			location = rc.getLocation();
 			try {
@@ -20,10 +21,15 @@ public class RobotPlayer {
 						rc.spawn(dir);
 				} else if (rc.getType() == RobotType.SOLDIER) {
 					// sense and destroy mines
+					if(rc.canMove(location.directionTo(enemyHQ)) == false && location.distanceSquaredTo(enemyHQ) > 5){
+						if(rc.senseMine(location.add(Direction.NORTH)) == null){
+							rc.move(Direction.NORTH);
+						} else {
+							rc.defuseMine(location.add(Direction.NORTH));
+						}
 					
-					if (location.distanceSquaredTo(enemyHQ) <2) {
-						rc.attackSquare(location.add(Direction.NORTH));
-					} else if (rc.senseMine(location.add(rc.getLocation().directionTo(rc.senseEnemyHQLocation()))) != null) {
+
+					} else if (rc.senseMine(location.add(location.directionTo(rc.senseEnemyHQLocation()))) != null) {
 						rc.defuseMine(location.add(location.directionTo(rc.senseEnemyHQLocation())));
 					} else {
 						rc.move(location.directionTo(rc.senseEnemyHQLocation()));
