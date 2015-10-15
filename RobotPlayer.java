@@ -28,7 +28,7 @@ public class RobotPlayer {
 							rc.defuseMine(location.add(Direction.NORTH));
 						}
 					
-
+//						Trent was here
 					} else if (rc.senseMine(location.add(location.directionTo(rc.senseEnemyHQLocation()))) != null) {
 						rc.defuseMine(location.add(location.directionTo(rc.senseEnemyHQLocation())));
 					} else {
