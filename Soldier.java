@@ -50,7 +50,7 @@ public class Soldier extends DefaultRobot {
 				} else if (task == defender){
 						cyclone();
 				} else if (task == mineSetter){
-					
+
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -58,7 +58,6 @@ public class Soldier extends DefaultRobot {
 			rc.yield();
 		}
 	}
-
 	private void moveRandomly() throws GameActionException {
 		int randInt = rand.nextInt(8);
 		MapLocation spot = rc.getLocation().add(directions[randInt]);
@@ -67,9 +66,7 @@ public class Soldier extends DefaultRobot {
 		} else {
 			rc.defuseMine(spot);
 		}
-	}
-	
+	}	
 	private void cyclone() throws GameActionException{
 		
 	}
-}
