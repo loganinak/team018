@@ -16,7 +16,6 @@ public class RobotPlayer {
 			break;
 		default:
 			break;
-
 		}
 	}
 }
