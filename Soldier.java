@@ -18,6 +18,7 @@ public class Soldier extends DefaultRobot {
 
 	public Soldier(RobotController rc) {
 		super(rc);
+		roundCount = rc.readBroadcast(roundCountChan);
 		int temp = rand.nextInt(5);
 		if (temp == 0) {
 			temp = rand.nextInt(2);
@@ -53,7 +54,6 @@ public class Soldier extends DefaultRobot {
 			MapLocation location = rc.getLocation();
 			try {
 				if (task == soldier) {
-					dirToEnemHQ = rc.getLocation().directionTo(enemyHQLoc);
 					lastMovingDir = movingDir;
 					movingDir = getDirTowTarAvoidMines(dirToEnemHQ);
 					MapLocation movingLoc = location.add(movingDir);
@@ -82,6 +82,8 @@ public class Soldier extends DefaultRobot {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			rc.setIndicatorString(1, "round: " + Integer.toString(roundCount));
+			roundCount++;
 			rc.yield();
 		}
 	}
