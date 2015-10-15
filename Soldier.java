@@ -5,24 +5,29 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 public class Soldier extends DefaultRobot {
-	public Soldier(RobotController rc){
+	public Soldier(RobotController rc) {
 		super(rc);
 	}
-	
-	public void run(){
-		while(true){
+
+	public void run() {
+		while (true) {
 			MapLocation location = rc.getLocation();
 			try {
-					if (location.distanceSquaredTo(enemyHQLoc) <2) {
-						rc.attackSquare(location.add(Direction.NORTH));
-					} else if (rc.senseMine(location.add(rc.getLocation().directionTo(rc.senseEnemyHQLocation()))) != null) {
-						rc.defuseMine(location.add(location.directionTo(rc.senseEnemyHQLocation())));
+				// sense and destroy mines
+				if(rc.canMove(location.directionTo(enemyHQLoc)) == false && location.distanceSquaredTo(enemyHQLoc) > 5){
+					if(rc.senseMine(location.add(Direction.NORTH)) == null){
+						rc.move(Direction.NORTH);
 					} else {
-						rc.move(location.directionTo(rc.senseEnemyHQLocation()));
-						rc.setIndicatorString(0, "test");
+						rc.defuseMine(location.add(Direction.NORTH));
 					}
 				
-				rc.yield();
+
+				} else if (rc.senseMine(location.add(location.directionTo(rc.senseEnemyHQLocation()))) != null) {
+					rc.defuseMine(location.add(location.directionTo(rc.senseEnemyHQLocation())));
+				} else {
+					rc.move(location.directionTo(rc.senseEnemyHQLocation()));
+					rc.setIndicatorString(0, "test");
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
