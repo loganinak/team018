@@ -9,26 +9,51 @@ public class Soldier extends DefaultRobot {
 		super(rc);
 	}
 
-	public void run() {
-		while (true) {
+	public void run() 
+	{
+		while (true)
+		{
+			
 			MapLocation location = rc.getLocation();
-			try {
-				// sense and destroy mines
-				if(rc.canMove(location.directionTo(enemyHQLoc)) == false && location.distanceSquaredTo(enemyHQLoc) > 5){
-					if(rc.senseMine(location.add(Direction.NORTH)) == null){
-						rc.move(Direction.NORTH);
-					} else {
-						rc.defuseMine(location.add(Direction.NORTH));
-					}
+			try
+			{
+				Direction toHome=location.directionTo(HQloc);
+				Direction toEnem=location.directionTo(enemyHQLoc);
 				
-
-				} else if (rc.senseMine(location.add(location.directionTo(rc.senseEnemyHQLocation()))) != null) {
-					rc.defuseMine(location.add(location.directionTo(rc.senseEnemyHQLocation())));
-				} else {
-					rc.move(location.directionTo(rc.senseEnemyHQLocation()));
-					rc.setIndicatorString(0, "test");
+//				VERY basic pathfinding towards enemy base
+//				!=null		means there is a mine
+				if(rc.senseMine(location.add(toEnem))!=null)
+				{
+					if(rc.senseMine(location.add(toEnem.rotateLeft()))!=null)
+					{
+						if(rc.senseMine(location.add(toEnem.rotateRight()))!=null)
+						{
+							rc.defuseMine(location.add(toEnem));
+							rc.move(toEnem);
+						}
+						else
+						{
+							rc.move(toEnem.rotateRight());
+						}
+					}
+					else
+					{
+						rc.move(toEnem.rotateLeft());
+					}
 				}
-			} catch (Exception e) {
+				
+				if(rc.canMove(toEnem))
+				{
+					rc.move(toEnem);
+				}
+				
+				
+			
+				
+			
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
 			}
 			rc.yield();
