@@ -37,7 +37,12 @@ public class Soldier extends DefaultRobot {
 						rc.defuseMine(movingLoc);
 					} else if(rc.canMove(movingDir) && !mine){
 						rc.move(lastMovingDir);
-					}						
+					} else {//does this if it can't move int it's previous direction
+						MapLocation mineLocation =location.add(dirToEnemHQ).add(dirToEnemHQ);
+						if(rc.senseMine(mineLocation) != null){
+							rc.defuseMine(mineLocation);
+						}
+					}
 				}
 				
 			} catch (Exception e) {
