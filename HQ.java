@@ -3,6 +3,7 @@ package team018;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.Upgrade;
 
 public class HQ extends DefaultRobot{
 	public HQ(RobotController rc){
@@ -29,7 +30,7 @@ public class HQ extends DefaultRobot{
 					}
 				}
 				if(spawned == false){
-					rc.spawn(dir);
+					rc.researchUpgrade(Upgrade.NUKE);
 				}
 			} catch(Exception e){
 				e.printStackTrace();
