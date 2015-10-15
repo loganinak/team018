@@ -14,23 +14,16 @@ public class HQ extends DefaultRobot{
 			MapLocation location = rc.getLocation();
 			try{
 				// spawn soldier
-				boolean spawned = false;
 				Direction dir = location.directionTo(enemyHQLoc);
-				if (rc.canMove(dir) && rc.senseMine(location.add(dir)) == null){
-					rc.spawn(dir);
-					spawned = true;
-				} else{
-					int i = 0;
-					while(i < 7 && spawned == false){
-						if(rc.senseMine(location.add(directions[i])) == null){
-							rc.spawn(directions[i]);
-							spawned = true;
-						} 
-					}
+				
+				dir = getDirTowTarAvoidMines(dir);
+				if(dir == null){
+					dir = randDirNoMines();
 				}
-				if(spawned == false){
-					rc.spawn(dir);
+				if(dir == null){
+					dir = directions[rand.nextInt(8)];
 				}
+				rc.spawn(dir);
 			} catch(Exception e){
 				e.printStackTrace();
 			}
