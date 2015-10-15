@@ -2,10 +2,16 @@ package team018;
 
 import java.util.Random;
 import battlecode.common.Direction;
+import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 public abstract class DefaultRobot {
+	protected int roundCountChan = 32566;
+	
+	protected int roundCount = 0;
+	protected int spawnBrodcastInt = 0;
+	protected int spawnChannel[] = {50, 1000, 999, 345, 6000, 10000, 986, 666, 999, 55404, 9930, 58483, 23454};
 	
 	protected final RobotController rc;
 	protected final MapLocation enemyHQLoc;
@@ -43,5 +49,21 @@ public abstract class DefaultRobot {
 			}
 		}
 		return null;
+	}
+	
+	protected void broadcastDataScram(int[] channel, int data) throws GameActionException{
+		int broadcastChan = roundCount;
+		while(broadcastChan > channel.length - 1){
+			broadcastChan = broadcastChan - (channel.length);
+		}
+		rc.broadcast(channel[broadcastChan], data);
+	}
+	
+	protected int readDataScram(int[] channel) throws GameActionException{
+		int broadcastChan = roundCount;
+		while(broadcastChan > channel.length - 1){
+			broadcastChan = broadcastChan - (channel.length);
+		}
+		return rc.readBroadcast(channel[broadcastChan]);
 	}
 }
