@@ -14,8 +14,21 @@ public class HQ extends DefaultRobot{
 			MapLocation location = rc.getLocation();
 			try{
 				// spawn soldier
-				Direction dir = location.directionTo(rc.senseEnemyHQLocation());
-				if (rc.canMove(dir)){
+				boolean spawned = false;
+				Direction dir = location.directionTo(enemyHQLoc);
+				if (rc.canMove(dir) && rc.senseMine(location.add(dir)) == null){
+					rc.spawn(dir);
+					spawned = true;
+				} else{
+					int i = 0;
+					while(i < 7 && spawned == false){
+						if(rc.senseMine(location.add(directions[i])) == null){
+							rc.spawn(directions[i]);
+							spawned = true;
+						} 
+					}
+				}
+				if(spawned == false){
 					rc.spawn(dir);
 				}
 			} catch(Exception e){
