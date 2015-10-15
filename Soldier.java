@@ -10,8 +10,6 @@ public class Soldier extends DefaultRobot {
 	private Direction dirToEnemHQ;
 	private Direction movingDir;
 	private Direction lastMovingDir;
-	int patrolCount = 0;
-	private Direction[] patrolPat = {Direction.NORTH,Direction.EAST,Direction.EAST, Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, Direction.WEST, Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.EAST, Direction.EAST};
 
 	private final int soldier = 0;
 	private final int defender = 1;
@@ -26,7 +24,7 @@ public class Soldier extends DefaultRobot {
 			if (temp == 0) {
 				task = defender;
 			} else {
-				task = defender;
+				task = builder;
 			}
 		} else {
 			task = soldier;
@@ -77,7 +75,7 @@ public class Soldier extends DefaultRobot {
 						}
 					}
 				} else if (task == defender) {
-					patrol(HQLoc);
+					rc.move(Direction.SOUTH);
 				} else if (task == builder) {
 					rc.move(Direction.NORTH);
 				}
@@ -88,12 +86,4 @@ public class Soldier extends DefaultRobot {
 		}
 	}
 
-	private void patrol(MapLocation target) throws GameActionException {
-		rc.move(patrolPat[patrolCount]);
-		patrolCount++;
-		
-		if(patrolCount > patrolPat.length -1){
-			patrolCount = 1;
-		}
-	}
 }
