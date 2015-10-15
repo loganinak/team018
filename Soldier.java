@@ -16,20 +16,12 @@ public class Soldier extends DefaultRobot {
 	private final int builder = 2;
 	private int task;
 
-	public Soldier(RobotController rc) {
+	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
 		roundCount = rc.readBroadcast(roundCountChan);
-		int temp = rand.nextInt(5);
-		if (temp == 0) {
-			temp = rand.nextInt(2);
-			if (temp == 0) {
-				task = defender;
-			} else {
-				task = builder;
-			}
-		} else {
-			task = soldier;
-		}
+		
+		task = 0;
+		
 		String role;
 		switch (task) {
 			case 0:
