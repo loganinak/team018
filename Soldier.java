@@ -43,6 +43,7 @@ public class Soldier extends DefaultRobot {
 
 	public void run() {
 		while (true) {
+			dirToEnemHQ = rc.getLocation().directionTo(enemyHQLoc);
 			MapLocation location = rc.getLocation();
 			try {
 				if (task == soldier) {
