@@ -16,39 +16,38 @@ public class Soldier extends DefaultRobot {
 	private final int defender = 1;
 	private final int builder = 2;
 	private int task;
-	
-	//what will spawn if you get to the end of the buildOrder array
+
+	// what will spawn if you get to the end of the buildOrder array
 	private int defaultUnit = 0;
-	//Change this to change build order
-	private int[] buildOrder = {0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+	// Change this to change build order
+	private int[] buildOrder = { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
 		roundCount = rc.readBroadcast(roundCountChan);
-		
-		int buildIndex = readDataScram(spawnChannel) -1;
-		if(buildIndex > buildOrder.length - 1){
+
+		int buildIndex = readDataScram(spawnChannel) - 1;
+		if (buildIndex > buildOrder.length - 1) {
 			task = defaultUnit;
-		} else{
+		} else {
 			task = buildOrder[buildIndex];
 		}
-		
+
 		String role;
 		switch (task) {
-			case 0:
-				role = "Soldier";
-				break;
-			case 1:
-				role = "Defender";
-				break;
-			case 2:
-				role = "builder";
-				break;
-			default:
-				role = "None";
-				break;
+		case 0:
+			role = "Soldier";
+			break;
+		case 1:
+			role = "Defender";
+			break;
+		case 2:
+			role = "builder";
+			break;
+		default:
+			role = "None";
+			break;
 		}
-
 		rc.setIndicatorString(0, "Role: " + role);
 	}
 
@@ -56,49 +55,11 @@ public class Soldier extends DefaultRobot {
 		while (true) {
 			dirToEnemHQ = rc.getLocation().directionTo(enemyHQLoc);
 			dirToHQ = rc.getLocation().directionTo(HQLoc);
-			MapLocation location = rc.getLocation();
 			try {
 				if (task == soldier) {
-					lastMovingDir = movingDir;
-					movingDir = getDirTowTarAvoidMines(dirToEnemHQ);
-					MapLocation movingLoc = location.add(movingDir);
-
-					boolean mine = rc.senseMine(movingLoc) != null;
-					if (mine) {
-						rc.defuseMine(movingLoc);
-						lastMovingDir = movingDir;
-					} else if (rc.canMove(movingDir) && !mine) {
-						rc.move(movingDir);
-						lastMovingDir = movingDir;
-					} else {// does this if it can't move towards the base
-						movingLoc = location.add(lastMovingDir);
-						mine = rc.senseMine(movingLoc) != null;
-						if (mine) {
-							rc.defuseMine(movingLoc);
-						} else if (rc.canMove(movingDir) && !mine) {
-							rc.move(lastMovingDir);
-						}
-					}
+					soldier();
 				} else if (task == defender) {
-					Direction spiral = dirToHQ.rotateLeft();
-					
-					if(rc.canMove(spiral))
-					{
-						if(rc.senseMine(location.add(spiral))!= null) {
-							rc.defuseMine(location.add(spiral));
-						} else{
-							rc.move(spiral);
-						}
-					}
-					else
-					{
-						if(rc.senseMine(location.add(spiral.rotateLeft().rotateLeft()))!= null) {
-							rc.defuseMine(location.add(spiral.rotateLeft()));
-						} else{
-							rc.move(spiral.rotateLeft().rotateLeft());
-						}
-		
-					}
+					spiralLoc(HQLoc);
 				} else if (task == builder) {
 					rc.move(Direction.NORTH);
 				}
@@ -111,4 +72,48 @@ public class Soldier extends DefaultRobot {
 		}
 	}
 
+	private void soldier() throws GameActionException {
+		lastMovingDir = movingDir;
+		movingDir = getDirTowTarAvoidMines(dirToEnemHQ);
+		MapLocation movingLoc = rc.getLocation().add(movingDir);
+
+		boolean mine = rc.senseMine(movingLoc) != null;
+		if (rc.getLocation().distanceSquaredTo(enemyHQLoc) > 4) {
+			if (mine) {
+				rc.defuseMine(movingLoc);
+				lastMovingDir = movingDir;
+			} else if (rc.canMove(movingDir) && !mine) {
+				rc.move(movingDir);
+				lastMovingDir = movingDir;
+			} else {// does this if it can't move towards the base
+				movingLoc = rc.getLocation().add(lastMovingDir);
+				mine = rc.senseMine(movingLoc) != null;
+				if (mine) {
+					rc.defuseMine(movingLoc);
+				} else if (rc.canMove(movingDir) && !mine) {
+					rc.move(lastMovingDir);
+				}
+			}
+		} else {
+			spiralLoc(enemyHQLoc);
+		}
+	}
+
+	private void spiralLoc(MapLocation target) throws GameActionException {
+		Direction spiral = rc.getLocation().directionTo(target).rotateLeft();
+		if (rc.canMove(spiral)) {
+			if (rc.senseMine(rc.getLocation().add(spiral)) != null) {
+				rc.defuseMine(rc.getLocation().add(spiral));
+			} else {
+				rc.move(spiral);
+			}
+		} else {
+			if (rc.senseMine(rc.getLocation().add(spiral.rotateLeft().rotateLeft())) != null) {
+				rc.defuseMine(rc.getLocation().add(spiral.rotateLeft()));
+			} else {
+				rc.move(spiral.rotateLeft().rotateLeft());
+			}
+
+		}
+	}
 }
