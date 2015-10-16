@@ -89,10 +89,11 @@ public class Soldier extends DefaultRobot {
 		lastMovingDir = movingDir;
 		movingDir = getDirTowTarAvoidMines(dirToEnemHQ);
 		MapLocation movingLoc = rc.getLocation().add(movingDir);
-
-		int numFriends = senseNumBotsAtLoc(attackSwarmLoc);
+		int numFriends = 0;
+		
 		if (attacking == false) {
 			attacking = readDataScram(attackChan) == 1;
+			numFriends = senseNumBotsAtLoc(attackSwarmLoc);
 		}
 		boolean mine = rc.senseMine(movingLoc) != null;
 		if (attacking == false && numFriends < 11) {
