@@ -8,7 +8,6 @@ import battlecode.common.Upgrade;
 
 public class HQ extends DefaultRobot {
 	private int soldierCount = 0;
-	private int attackerCount = 0;
 
 	public HQ(RobotController rc) {
 		super(rc);
@@ -36,12 +35,7 @@ public class HQ extends DefaultRobot {
 						soldierCount++;
 					}
 					rc.broadcast(roundCountChan, roundCount);
-					int needDefense = senseNeedDefense();
-					if(needDefense == 0){
-						attackerCount++;
-						broadcastDataScram(attackCntChan, attackerCount);
-					}
-					broadcastDataScram(defenseNeedChan, needDefense);
+					broadcastDataScram(defenseNeedChan, rc.senseNearbyGameObjects(Robot.class, 9, rc.getTeam()).length);
 					broadcastDataScram(spawnChannel, soldierCount);
 				}
 			} catch (Exception e) {
@@ -51,12 +45,5 @@ public class HQ extends DefaultRobot {
 			roundCount++;
 			rc.yield();
 		}
-	}
-	
-	private int senseNeedDefense(){
-		if(rc.senseNearbyGameObjects(Robot.class, 9, rc.getTeam()).length < 12){
-			return 1;
-		}
-		return 0;
 	}
 }

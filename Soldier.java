@@ -11,8 +11,10 @@ public class Soldier extends DefaultRobot {
 	private Direction dirToHQ;
 	private Direction movingDir;
 	private Direction lastMovingDir;
+	boolean attacking = false;
+	private MapLocation attackSwarmLoc;
 
-	private final int soldier = 0;
+	private final int attacker = 0;
 	private final int defender = 1;
 	private final int builder = 2;
 	private int task;
@@ -25,9 +27,9 @@ public class Soldier extends DefaultRobot {
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
 		roundCount = rc.readBroadcast(roundCountChan);
-		int needDefense = readDataScram(defenseNeedChan);
+		int numDefenseBots = readDataScram(defenseNeedChan);
 
-		if (needDefense == 1) {
+		if (numDefenseBots < 7) {
 			task = 1;
 		} else {
 			int buildIndex = readDataScram(spawnChannel) - 1;
@@ -38,10 +40,10 @@ public class Soldier extends DefaultRobot {
 			}
 		}
 
-		String role;
+		String role = "none";
 		switch (task) {
 		case 0:
-			role = "Soldier";
+			attackSwarmLoc = midLoc(midLoc(enemyHQLoc, HQLoc), HQLoc);
 			break;
 		case 1:
 			role = "Defender";
@@ -61,8 +63,8 @@ public class Soldier extends DefaultRobot {
 			dirToEnemHQ = rc.getLocation().directionTo(enemyHQLoc);
 			dirToHQ = rc.getLocation().directionTo(HQLoc);
 			try {
-				if (task == soldier) {
-					soldier();
+				if (task == attacker) {
+					attacker();
 				} else if (task == defender) {
 					spiralLoc(HQLoc);
 				} else if (task == builder) {
@@ -77,15 +79,23 @@ public class Soldier extends DefaultRobot {
 		}
 	}
 
-	private void soldier() throws GameActionException {
+	private void attacker() throws GameActionException {
 		lastMovingDir = movingDir;
 		movingDir = getDirTowTarAvoidMines(dirToEnemHQ);
 		MapLocation movingLoc = rc.getLocation().add(movingDir);
 
+		int numFriends = senseNumBotsAtLoc(attackSwarmLoc);
+		if (attacking == false) {
+			attacking = readDataScram(attackChan) == 1;
+		}
 		boolean mine = rc.senseMine(movingLoc) != null;
-		if (readDataScram(attackCntChan) < 11) {
-			spiralLoc(midLoc(HQLoc, enemyHQLoc));
+		if (attacking == false && numFriends < 11) {
+			spiralLoc(attackSwarmLoc);
 		} else {
+			if (readDataScram(attackChan) == 0) {
+				attacking = true;
+				broadcastDataScram(attackChan, 1);
+			}
 			if (rc.getLocation().distanceSquaredTo(enemyHQLoc) > 4) {
 				if (mine) {
 					rc.defuseMine(movingLoc);
