@@ -64,11 +64,17 @@ public class Soldier extends DefaultRobot {
 			dirToHQ = rc.getLocation().directionTo(HQLoc);
 			try {
 				if (task == attacker) {
-					attacker();
+					if (rc.isActive()) {
+						attacker();
+					}
 				} else if (task == defender) {
-					spiralLoc(HQLoc);
+					if (rc.isActive()) {
+						spiralLoc(HQLoc);
+					}
 				} else if (task == builder) {
-					rc.move(Direction.NORTH);
+					if (rc.isActive()) {
+						rc.move(Direction.NORTH);
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -127,10 +133,10 @@ public class Soldier extends DefaultRobot {
 				rc.move(spiral);
 			}
 		} else {
-			if (rc.senseMine(rc.getLocation().add(spiral.rotateLeft().rotateLeft())) != null) {
+			if (rc.senseMine(rc.getLocation().add(spiral.rotateLeft())) != null) {
 				rc.defuseMine(rc.getLocation().add(spiral.rotateLeft()));
 			} else {
-				rc.move(spiral.rotateLeft().rotateLeft());
+				rc.move(spiral.rotateLeft());
 			}
 
 		}
