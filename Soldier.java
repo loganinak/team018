@@ -11,8 +11,10 @@ public class Soldier extends DefaultRobot {
 	private Direction dirToHQ;
 	private Direction movingDir;
 	private Direction lastMovingDir;
+	boolean attacking = false;
+	private MapLocation attackSwarmLoc;
 
-	private final int soldier = 0;
+	private final int attacker = 0;
 	private final int defender = 1;
 	private final int builder = 2;
 	private int task;
@@ -20,23 +22,28 @@ public class Soldier extends DefaultRobot {
 	// what will spawn if you get to the end of the buildOrder array
 	private int defaultUnit = 0;
 	// Change this to change build order
-	private int[] buildOrder = { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	private int[] buildOrder = { 0, 0 };
 
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
 		roundCount = rc.readBroadcast(roundCountChan);
+		int numDefenseBots = readDataScram(defenseNeedChan);
 
-		int buildIndex = readDataScram(spawnChannel) - 1;
-		if (buildIndex > buildOrder.length - 1) {
-			task = defaultUnit;
+		if (numDefenseBots < 7) {
+			task = 1;
 		} else {
-			task = buildOrder[buildIndex];
+			int buildIndex = readDataScram(spawnChannel) - 1;
+			if (buildIndex > buildOrder.length - 1) {
+				task = defaultUnit;
+			} else {
+				task = buildOrder[buildIndex];
+			}
 		}
 
-		String role;
+		String role = "none";
 		switch (task) {
 		case 0:
-			role = "Soldier";
+			attackSwarmLoc = midLoc(midLoc(enemyHQLoc, HQLoc), HQLoc);
 			break;
 		case 1:
 			role = "Defender";
@@ -56,12 +63,18 @@ public class Soldier extends DefaultRobot {
 			dirToEnemHQ = rc.getLocation().directionTo(enemyHQLoc);
 			dirToHQ = rc.getLocation().directionTo(HQLoc);
 			try {
-				if (task == soldier) {
-					soldier();
+				if (task == attacker) {
+					if (rc.isActive()) {
+						attacker();
+					}
 				} else if (task == defender) {
-					spiralLoc(HQLoc);
+					if (rc.isActive()) {
+						spiralLoc(HQLoc);
+					}
 				} else if (task == builder) {
-					rc.move(Direction.NORTH);
+					if (rc.isActive()) {
+						rc.move(Direction.NORTH);
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -72,30 +85,43 @@ public class Soldier extends DefaultRobot {
 		}
 	}
 
-	private void soldier() throws GameActionException {
+	private void attacker() throws GameActionException {
 		lastMovingDir = movingDir;
 		movingDir = getDirTowTarAvoidMines(dirToEnemHQ);
 		MapLocation movingLoc = rc.getLocation().add(movingDir);
-
+		int numFriends = 0;
+		
+		if (attacking == false) {
+			attacking = readDataScram(attackChan) == 1;
+			numFriends = senseNumBotsAtLoc(attackSwarmLoc);
+		}
 		boolean mine = rc.senseMine(movingLoc) != null;
-		if (rc.getLocation().distanceSquaredTo(enemyHQLoc) > 4) {
-			if (mine) {
-				rc.defuseMine(movingLoc);
-				lastMovingDir = movingDir;
-			} else if (rc.canMove(movingDir) && !mine) {
-				rc.move(movingDir);
-				lastMovingDir = movingDir;
-			} else {// does this if it can't move towards the base
-				movingLoc = rc.getLocation().add(lastMovingDir);
-				mine = rc.senseMine(movingLoc) != null;
+		if (attacking == false && numFriends < 11) {
+			spiralLoc(attackSwarmLoc);
+		} else {
+			if (readDataScram(attackChan) == 0) {
+				attacking = true;
+				broadcastDataScram(attackChan, 1);
+			}
+			if (rc.getLocation().distanceSquaredTo(enemyHQLoc) > 4) {
 				if (mine) {
 					rc.defuseMine(movingLoc);
+					lastMovingDir = movingDir;
 				} else if (rc.canMove(movingDir) && !mine) {
-					rc.move(lastMovingDir);
+					rc.move(movingDir);
+					lastMovingDir = movingDir;
+				} else {// does this if it can't move towards the base
+					movingLoc = rc.getLocation().add(lastMovingDir);
+					mine = rc.senseMine(movingLoc) != null;
+					if (mine) {
+						rc.defuseMine(movingLoc);
+					} else if (rc.canMove(movingDir) && !mine) {
+						rc.move(lastMovingDir);
+					}
 				}
+			} else {
+				spiralLoc(enemyHQLoc);
 			}
-		} else {
-			spiralLoc(enemyHQLoc);
 		}
 	}
 
@@ -108,10 +134,10 @@ public class Soldier extends DefaultRobot {
 				rc.move(spiral);
 			}
 		} else {
-			if (rc.senseMine(rc.getLocation().add(spiral.rotateLeft().rotateLeft())) != null) {
+			if (rc.senseMine(rc.getLocation().add(spiral.rotateLeft())) != null) {
 				rc.defuseMine(rc.getLocation().add(spiral.rotateLeft()));
 			} else {
-				rc.move(spiral.rotateLeft().rotateLeft());
+				rc.move(spiral.rotateLeft());
 			}
 
 		}

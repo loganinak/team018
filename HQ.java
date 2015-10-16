@@ -2,6 +2,7 @@ package team018;
 
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
+import battlecode.common.Robot;
 import battlecode.common.RobotController;
 import battlecode.common.Upgrade;
 
@@ -34,6 +35,7 @@ public class HQ extends DefaultRobot {
 						soldierCount++;
 					}
 					rc.broadcast(roundCountChan, roundCount);
+					broadcastDataScram(defenseNeedChan, rc.senseNearbyGameObjects(Robot.class, 9, rc.getTeam()).length);
 					broadcastDataScram(spawnChannel, soldierCount);
 				}
 			} catch (Exception e) {
