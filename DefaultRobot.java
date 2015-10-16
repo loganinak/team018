@@ -12,6 +12,8 @@ public abstract class DefaultRobot {
 	protected int roundCount = 0;
 	protected int spawnBrodcastInt = 0;
 	protected int spawnChannel[] = {50, 1000, 999, 345, 6000, 10000, 986, 666, 999, 55404, 9930, 58483, 23454};
+	protected int defenseNeedChan[] = {10, 5625, 9561, 8489, 7512};
+	protected int attackCntChan[] = {5564, 9844, 25845, 36548, 8455, 45593};
 	
 	protected final RobotController rc;
 	protected final MapLocation enemyHQLoc;
@@ -65,5 +67,9 @@ public abstract class DefaultRobot {
 			broadcastChan = broadcastChan - (channel.length);
 		}
 		return rc.readBroadcast(channel[broadcastChan]);
+	}
+	
+	protected MapLocation midLoc(MapLocation loc1, MapLocation loc2){
+		return new MapLocation((loc1.x + loc2.x)/2, (loc1.y + loc2.y)/2);
 	}
 }

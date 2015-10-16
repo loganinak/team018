@@ -20,17 +20,22 @@ public class Soldier extends DefaultRobot {
 	// what will spawn if you get to the end of the buildOrder array
 	private int defaultUnit = 0;
 	// Change this to change build order
-	private int[] buildOrder = { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	private int[] buildOrder = { 0, 0 };
 
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
 		roundCount = rc.readBroadcast(roundCountChan);
+		int needDefense = readDataScram(defenseNeedChan);
 
-		int buildIndex = readDataScram(spawnChannel) - 1;
-		if (buildIndex > buildOrder.length - 1) {
-			task = defaultUnit;
+		if (needDefense == 1) {
+			task = 1;
 		} else {
-			task = buildOrder[buildIndex];
+			int buildIndex = readDataScram(spawnChannel) - 1;
+			if (buildIndex > buildOrder.length - 1) {
+				task = defaultUnit;
+			} else {
+				task = buildOrder[buildIndex];
+			}
 		}
 
 		String role;
@@ -78,24 +83,28 @@ public class Soldier extends DefaultRobot {
 		MapLocation movingLoc = rc.getLocation().add(movingDir);
 
 		boolean mine = rc.senseMine(movingLoc) != null;
-		if (rc.getLocation().distanceSquaredTo(enemyHQLoc) > 4) {
-			if (mine) {
-				rc.defuseMine(movingLoc);
-				lastMovingDir = movingDir;
-			} else if (rc.canMove(movingDir) && !mine) {
-				rc.move(movingDir);
-				lastMovingDir = movingDir;
-			} else {// does this if it can't move towards the base
-				movingLoc = rc.getLocation().add(lastMovingDir);
-				mine = rc.senseMine(movingLoc) != null;
+		if (readDataScram(attackCntChan) < 11) {
+			spiralLoc(midLoc(HQLoc, enemyHQLoc));
+		} else {
+			if (rc.getLocation().distanceSquaredTo(enemyHQLoc) > 4) {
 				if (mine) {
 					rc.defuseMine(movingLoc);
+					lastMovingDir = movingDir;
 				} else if (rc.canMove(movingDir) && !mine) {
-					rc.move(lastMovingDir);
+					rc.move(movingDir);
+					lastMovingDir = movingDir;
+				} else {// does this if it can't move towards the base
+					movingLoc = rc.getLocation().add(lastMovingDir);
+					mine = rc.senseMine(movingLoc) != null;
+					if (mine) {
+						rc.defuseMine(movingLoc);
+					} else if (rc.canMove(movingDir) && !mine) {
+						rc.move(lastMovingDir);
+					}
 				}
+			} else {
+				spiralLoc(enemyHQLoc);
 			}
-		} else {
-			spiralLoc(enemyHQLoc);
 		}
 	}
 
