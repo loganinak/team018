@@ -8,6 +8,7 @@ import battlecode.common.RobotController;
 public class Soldier extends DefaultRobot {
 
 	private Direction dirToEnemHQ;
+	private Direction dirToHQ;
 	private Direction movingDir;
 	private Direction lastMovingDir;
 
@@ -19,7 +20,7 @@ public class Soldier extends DefaultRobot {
 	//what will spawn if you get to the end of the buildOrder array
 	private int defaultUnit = 0;
 	//Change this to change build order
-	private int[] buildOrder = {0, 0, 0, 1, 1, 1, 2, 2};
+	private int[] buildOrder = {0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
@@ -54,6 +55,7 @@ public class Soldier extends DefaultRobot {
 	public void run() {
 		while (true) {
 			dirToEnemHQ = rc.getLocation().directionTo(enemyHQLoc);
+			dirToHQ = rc.getLocation().directionTo(HQLoc);
 			MapLocation location = rc.getLocation();
 			try {
 				if (task == soldier) {
@@ -78,7 +80,25 @@ public class Soldier extends DefaultRobot {
 						}
 					}
 				} else if (task == defender) {
-					rc.move(Direction.SOUTH);
+					Direction spiral = dirToHQ.rotateLeft();
+					
+					if(rc.canMove(spiral))
+					{
+						if(rc.senseMine(location.add(spiral))!= null) {
+							rc.defuseMine(location.add(spiral));
+						} else{
+							rc.move(spiral);
+						}
+					}
+					else
+					{
+						if(rc.senseMine(location.add(spiral.rotateLeft().rotateLeft()))!= null) {
+							rc.defuseMine(location.add(spiral.rotateLeft()));
+						} else{
+							rc.move(spiral.rotateLeft().rotateLeft());
+						}
+		
+					}
 				} else if (task == builder) {
 					rc.move(Direction.NORTH);
 				}
