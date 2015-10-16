@@ -15,12 +15,22 @@ public class Soldier extends DefaultRobot {
 	private final int defender = 1;
 	private final int builder = 2;
 	private int task;
+	
+	//what will spawn if you get to the end of the buildOrder array
+	private int defaultUnit = 0;
+	//Change this to change build order
+	private int[] buildOrder = {0, 0, 0, 1, 1, 1, 2, 2};
 
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
 		roundCount = rc.readBroadcast(roundCountChan);
 		
-		task = 0;
+		int buildIndex = readDataScram(spawnChannel) -1;
+		if(buildIndex > buildOrder.length - 1){
+			task = defaultUnit;
+		} else{
+			task = buildOrder[buildIndex];
+		}
 		
 		String role;
 		switch (task) {
