@@ -8,7 +8,6 @@ import battlecode.common.RobotController;
 public class Soldier extends DefaultRobot {
 
 	private Direction dirToEnemHQ;
-	private Direction dirToHQ;
 	private Direction movingDir;
 	private Direction lastMovingDir;
 	boolean attacking = false;
@@ -26,7 +25,6 @@ public class Soldier extends DefaultRobot {
 
 	public Soldier(RobotController rc) throws GameActionException {
 		super(rc);
-		roundCount = rc.readBroadcast(roundCountChan);
 		int numDefenseBots = readDataScram(defenseNeedChan);
 
 		if (numDefenseBots < 7) {
@@ -61,7 +59,6 @@ public class Soldier extends DefaultRobot {
 	public void run() {
 		while (true) {
 			dirToEnemHQ = rc.getLocation().directionTo(enemyHQLoc);
-			dirToHQ = rc.getLocation().directionTo(HQLoc);
 			try {
 				if (task == attacker) {
 					if (rc.isActive()) {
@@ -79,8 +76,6 @@ public class Soldier extends DefaultRobot {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			rc.setIndicatorString(1, "round: " + Integer.toString(roundCount));
-			roundCount++;
 			rc.yield();
 		}
 	}
@@ -122,6 +117,7 @@ public class Soldier extends DefaultRobot {
 			} else {
 				spiralLoc(enemyHQLoc);
 			}
+			
 		}
 	}
 

@@ -1,5 +1,6 @@
 package team018;
 
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.Robot;
@@ -18,7 +19,7 @@ public class HQ extends DefaultRobot {
 			MapLocation location = rc.getLocation();
 			try {
 				if (rc.isActive()) {
-					if (roundCount < 45 && roundCount != 0 && roundCount != 30) {
+					if (Clock.getRoundNum() < 45 && Clock.getRoundNum() != 0 && Clock.getRoundNum() != 30) {
 						rc.researchUpgrade(Upgrade.DEFUSION);
 					} else {
 						// spawn soldier
@@ -34,15 +35,12 @@ public class HQ extends DefaultRobot {
 						rc.spawn(dir);
 						soldierCount++;
 					}
-					rc.broadcast(roundCountChan, roundCount);
 					broadcastDataScram(defenseNeedChan, rc.senseNearbyGameObjects(Robot.class, 9, rc.getTeam()).length);
 					broadcastDataScram(spawnChannel, soldierCount);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			rc.setIndicatorString(1, "round: " + Integer.toString(roundCount));
-			roundCount++;
 			rc.yield();
 		}
 	}
