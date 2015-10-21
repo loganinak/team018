@@ -58,13 +58,13 @@ public class Soldier extends DefaultRobot {
 		case attacker:
 			role = "Attacker";
 			attackSwarmLoc = midLoc(enemyHQLoc, HQLoc);
-//			if(HQLoc.x != enemyHQLoc.x && HQLoc.y != enemyHQLoc.y){
-//				attackSwarmLoc = new MapLocation(attackSwarmLoc.x + enemyHQLoc.x, attackSwarmLoc.y);
-//			} else if(rc.getMapHeight()/2 < HQLoc.y){
-//				attackSwarmLoc = new MapLocation(attackSwarmLoc.x, attackSwarmLoc.y - rc.getMapHeight()/2);
-//			} else {
-//				attackSwarmLoc = new MapLocation(attackSwarmLoc.x, attackSwarmLoc.y + rc.getMapHeight()/2);
-//			}
+			if(HQLoc.x != enemyHQLoc.x && HQLoc.y != enemyHQLoc.y){
+				attackSwarmLoc = new MapLocation(attackSwarmLoc.x + enemyHQLoc.x, attackSwarmLoc.y);
+			} else if(rc.getMapHeight()/2 < HQLoc.y){
+				attackSwarmLoc = new MapLocation(attackSwarmLoc.x, attackSwarmLoc.y - rc.getMapHeight()/2);
+			} else {
+				attackSwarmLoc = new MapLocation(attackSwarmLoc.x, attackSwarmLoc.y + rc.getMapHeight()/2);
+			}
 			break;
 		case defender:
 			role = "Defender";
@@ -115,43 +115,21 @@ public class Soldier extends DefaultRobot {
 	}
 
 	private void attacker() throws GameActionException {
-		lastMovingDir = movingDir;
-		movingDir = getDirTowTarAvoidMines(dirToEnemHQ);
-		MapLocation movingLoc = rc.getLocation().add(movingDir);
-		int numFriends = 0;
-
-		if (attacking == false) {
-			attacking = readDataScram(attackChan) == 1;
-			numFriends = senseNumBotsAtLoc(attackSwarmLoc);
+		//sensing if it's time to attack if not already attacking
+		attacking = readDataScram(attackChan) >= attackReq;
+		if(!attacking && rc.canSenseSquare(attackSwarmLoc)){
+			Robot[] friends = rc.senseNearbyGameObjects(Robot.class, attackSwarmLoc, 25, rc.getTeam());
+			if(friends.length >= attackReq){
+				broadcastDataScram(attackChan, friends.length);
+			}
 		}
-		boolean mine = rc.senseMine(movingLoc) != null;
-		if (attacking == false && numFriends < attackReq) {
-				spiralLoc(attackSwarmLoc);	
+		
+		if(!attacking){ //grouping
+			spiralLoc(attackSwarmLoc);
+		} else if (rc.getLocation().distanceSquaredTo(enemyHQLoc) > 9){ //attacking
+			moveToTarg(enemyHQLoc);
 		} else {
-			if (readDataScram(attackChan) == 0) {
-				attacking = true;
-				broadcastDataScram(attackChan, 1);
-			}
-			if (rc.getLocation().distanceSquaredTo(enemyHQLoc) > 4) {
-				if (mine) {
-					rc.defuseMine(movingLoc);
-					lastMovingDir = movingDir;
-				} else if (rc.canMove(movingDir) && !mine) {
-					rc.move(movingDir);
-					lastMovingDir = movingDir;
-				} else {// does this if it can't move towards the base
-					movingLoc = rc.getLocation().add(lastMovingDir);
-					mine = rc.senseMine(movingLoc) != null;
-					if (mine) {
-						rc.defuseMine(movingLoc);
-					} else if (rc.canMove(lastMovingDir) && !mine) {
-						rc.move(lastMovingDir);
-					}
-				}
-			} else {
-				spiralLoc(enemyHQLoc);
-			}
-
+			spiralLoc(enemyHQLoc);
 		}
 	}
 
@@ -195,24 +173,25 @@ public class Soldier extends DefaultRobot {
 
 		} else {
 			Direction randDir = randDirNoMines();
-			if(rc.canMove(randDir)){
+			if(randDir != null && rc.canMove(randDir)){
 				rc.move(randDir);
 			}
 		}
 	}
 	
 	private void moveToTarg(MapLocation target) throws GameActionException{
-		Direction dirToTar = getDirTowTarAvoidMines(rc.getLocation().directionTo(target));
-		if(dirToTar == null && rc.canMove(lastMovingDir)){
+		lastMovingDir = movingDir;
+		movingDir = getDirTowTarAvoidMines(rc.getLocation().directionTo(target));
+		if(movingDir == null && rc.canMove(lastMovingDir)){
 			if(rc.senseMine(rc.getLocation().add(lastMovingDir)) == null){
 				rc.move(lastMovingDir);
 			} else {
 				rc.defuseMine(rc.getLocation().add(lastMovingDir));
 			}
-		}else if(rc.senseMine(rc.getLocation().add(dirToTar)) == null){
-			rc.move(dirToTar);
+		}else if(rc.senseMine(rc.getLocation().add(movingDir)) == null){
+			rc.move(movingDir);
 		} else {
-			rc.defuseMine(rc.getLocation().add(dirToTar));
+			rc.defuseMine(rc.getLocation().add(movingDir));
 		}
 	}
 }

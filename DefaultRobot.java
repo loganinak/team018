@@ -24,7 +24,7 @@ public abstract class DefaultRobot {
 	static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 	static Random rand;
 	
-	protected DefaultRobot(RobotController rc){
+	DefaultRobot(RobotController rc){
 		this.rc = rc;
 		enemyHQLoc = rc.senseEnemyHQLocation();
 		HQLoc = rc.senseHQLocation();
@@ -32,7 +32,9 @@ public abstract class DefaultRobot {
 		enemy = rc.getTeam().opponent();
 	}
 	
-	public abstract void run();
+	void run(){
+		
+	}
 	
 	protected Direction getDirTowTarAvoidMines(Direction target){
 		if(rc.canMove(target) && rc.senseMine(rc.getLocation().add(target)) == null){
@@ -76,10 +78,4 @@ public abstract class DefaultRobot {
 		return new MapLocation((loc1.x + loc2.x)/2, (loc1.y + loc2.y)/2);
 	}
 	
-	protected int senseNumBotsAtLoc(MapLocation location){
-		if(rc.getLocation().distanceSquaredTo(location) <= 9){
-			return rc.senseNearbyGameObjects(Robot.class, location, 9, rc.getTeam()).length;
-		}
-		return -1;
-	}
 }
