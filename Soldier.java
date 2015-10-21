@@ -58,13 +58,13 @@ public class Soldier extends DefaultRobot {
 		case attacker:
 			role = "Attacker";
 			attackSwarmLoc = midLoc(enemyHQLoc, HQLoc);
-			if(HQLoc.x != enemyHQLoc.x && HQLoc.y != enemyHQLoc.y){
-				attackSwarmLoc = new MapLocation(attackSwarmLoc.x + enemyHQLoc.x, attackSwarmLoc.y);
-			} else if(rc.getMapHeight()/2 < HQLoc.y){
-				attackSwarmLoc = new MapLocation(attackSwarmLoc.x, attackSwarmLoc.y - rc.getMapHeight()/2);
-			} else {
-				attackSwarmLoc = new MapLocation(attackSwarmLoc.x, attackSwarmLoc.y + rc.getMapHeight()/2);
-			}
+//			if(HQLoc.x != enemyHQLoc.x && HQLoc.y != enemyHQLoc.y){
+//				attackSwarmLoc = new MapLocation(attackSwarmLoc.x + enemyHQLoc.x, attackSwarmLoc.y);
+//			} else if(rc.getMapHeight()/2 < HQLoc.y){
+//				attackSwarmLoc = new MapLocation(attackSwarmLoc.x, attackSwarmLoc.y - rc.getMapHeight()/2);
+//			} else {
+//				attackSwarmLoc = new MapLocation(attackSwarmLoc.x, attackSwarmLoc.y + rc.getMapHeight()/2);
+//			}
 			break;
 		case defender:
 			role = "Defender";
@@ -107,6 +107,7 @@ public class Soldier extends DefaultRobot {
 				}
 			} catch (Exception e) {
 				rc.setIndicatorString(1, e.getMessage());
+				
 				e.printStackTrace();
 			}
 			rc.yield();
