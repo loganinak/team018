@@ -35,7 +35,8 @@ public class HQ extends DefaultRobot {
 						rc.spawn(dir);
 						soldierCount++;
 					}
-					broadcastDataScram(defenseNeedChan, rc.senseNearbyGameObjects(Robot.class, 9, rc.getTeam()).length);
+					Direction dirToEnemHQ = rc.getLocation().directionTo(enemyHQLoc);
+					broadcastDataScram(defenseNeedChan, rc.senseNearbyGameObjects(Robot.class,rc.getLocation().add(dirToEnemHQ).add(dirToEnemHQ), 16, rc.getTeam()).length);
 					broadcastDataScram(spawnChannel, soldierCount);
 				}
 			} catch (Exception e) {

@@ -8,6 +8,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.Robot;
 import battlecode.common.RobotController;
+import battlecode.common.Team;
 
 public abstract class DefaultRobot {
 	
@@ -15,6 +16,7 @@ public abstract class DefaultRobot {
 	protected static int spawnChannel[] = {50, 1000, 999, 345, 6000, 10000, 986, 666, 999, 55404, 9930, 58483, 23454};
 	protected static int defenseNeedChan[] = {10, 5625, 9561, 8489, 7512};
 	protected static int attackChan[] = {5564, 9844, 25845, 36548, 8455, 45593};
+	protected static Team enemy;
 	
 	protected final RobotController rc;
 	protected final MapLocation enemyHQLoc;
@@ -22,15 +24,15 @@ public abstract class DefaultRobot {
 	static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 	static Random rand;
 	
-	DefaultRobot(RobotController rc){
+	protected DefaultRobot(RobotController rc){
 		this.rc = rc;
 		enemyHQLoc = rc.senseEnemyHQLocation();
 		HQLoc = rc.senseHQLocation();
 		rand = new Random(rc.getRobot().getID());
+		enemy = rc.getTeam().opponent();
 	}
 	
-	void run() {
-	}
+	public abstract void run();
 	
 	protected Direction getDirTowTarAvoidMines(Direction target){
 		if(rc.canMove(target) && rc.senseMine(rc.getLocation().add(target)) == null){
@@ -40,16 +42,16 @@ public abstract class DefaultRobot {
 		} else if(rc.canMove(target.rotateRight()) && rc.senseMine(rc.getLocation().add(target.rotateRight())) == null){
 			return target.rotateRight();
 		}
-		return target;
+		return null;
 	}
 	
 	protected Direction randDirNoMines(){
-		boolean spotFound = false;
 		int  i = 0;
-		while(i < 8 && !spotFound){
-			if(rc.senseMine(rc.getLocation().add(directions[i])) == null){
+		while(i < 8){
+			if(rc.senseMine(rc.getLocation().add(directions[i])) == null && rc.canMove(rc.getLocation().directionTo(rc.getLocation().add(directions[i])))){
 				return directions[i];
 			}
+			i++;
 		}
 		return null;
 	}
